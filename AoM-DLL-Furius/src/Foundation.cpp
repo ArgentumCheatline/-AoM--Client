@@ -50,11 +50,31 @@ GENERATE_METHOD_0F(HkGetTickCount, OnLoop,         m_GetTickCountDetour.lpTrampo
 VOID Foundation::OnCreate()
 {
     //!
-    //! Attach all trampolines.
-    //! 
-    Memory::MmWrite((LPVOID) 0x6CF9F0, (LPVOID) &HkRcvData, &m_RecvDetour);
-    Memory::MmWrite((LPVOID) 0x715810, (LPVOID) &HkSndData, &m_SendDetour);
+    //! [DETOUR] FuriusAO (Handle)
+    //!
+    TAction nAction;
+    nAction.lpAddress   = (LPVOID) 0x600000;
+    nAction.lpFunction  = (LPVOID) &HkRcvData;
+    nAction.szwcPattern = "\x85\xC9\x74\x33\xC7\x45\xFC\xF4\x00\x00\x00\x8B"
+                          "\x95\x18\xFF\xFF\xFF\x52\xFF\x15\xFF\xFF\xFF\xFF"
+                          "\x83\xE8\x01";
+    nAction.szwcMask    = "xxxxxxxxxxxxxxxxxxxx????xxx";
+    Memory::MmWrite(nAction, &m_RecvDetour);
 
+    //!
+    //! [DETOUR] FuriusAO (Send)
+    //!
+    nAction.lpAddress   = (LPVOID) 0x600000;
+    nAction.lpFunction  = (LPVOID) &HkRcvData;
+    nAction.szwcPattern = "\x50\x68\xFF\xFF\xFF\xFF\xFF\x15\xFF\xFF\xFF\xFF"
+                          "\x8B\xF8\x8B\x0D\xFF\xFF\xFF\xFF\xF7\xDF\x1B\xFF"
+                          "\xF7\xDF\xF7\xDF";
+    nAction.szwcMask    = "xx????xx????xxxx????xxxxxxxx";
+    Memory::MmWrite(nAction, &m_RecvDetour);
+
+    //!
+    //! [DETOUR] GetTickCount
+    //!
     LPVOID lpMethod = EngineAPI::GetFunction(EngineAPI::GetModule(MODULE_KERNEL), 0xF791FB23);
     Memory::MmWrite(lpMethod, (LPVOID) &HkGetTickCount, &m_GetTickCountDetour);
 }
