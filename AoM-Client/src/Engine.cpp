@@ -83,7 +83,7 @@ VOID Engine::NetConnect()
     fnRtlFillMemory(&lpServer, sizeof(struct sockaddr_in), 0);
     lpServer.sin_family      = AF_INET;
     lpServer.sin_addr.s_addr = fnHtonl(INADDR_LOOPBACK);
-    lpServer.sin_port        = fnHtons(Foundation::GetPort());
+    lpServer.sin_port        = fnHtons(10000);  // Port: 10000
 
     ///
     /// Create the socket
