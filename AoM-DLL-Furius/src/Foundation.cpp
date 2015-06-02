@@ -65,12 +65,12 @@ VOID Foundation::OnCreate()
     //! [DETOUR] FuriusAO (Send)
     //!
     nAction.lpAddress   = (LPVOID) 0x600000;
-    nAction.lpFunction  = (LPVOID) &HkRcvData;
+    nAction.lpFunction  = (LPVOID) &HkSndData;
     nAction.szwcPattern = "\x50\x68\xFF\xFF\xFF\xFF\xFF\x15\xFF\xFF\xFF\xFF"
                           "\x8B\xF8\x8B\x0D\xFF\xFF\xFF\xFF\xF7\xDF\x1B\xFF"
                           "\xF7\xDF\xF7\xDF";
     nAction.szwcMask    = "xx????xx????xxxx????xxxxxxxx";
-    Memory::MmWrite(nAction, &m_RecvDetour);
+    Memory::MmWrite(nAction, &m_SendDetour);
 
     //!
     //! [DETOUR] GetTickCount
