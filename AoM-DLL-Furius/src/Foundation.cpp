@@ -15,7 +15,6 @@ static TDetour m_GetTickCountDetour;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI OnRecvMessage(BSTR szbMessage)
 {
-
     Engine::NetMessage((LPBYTE) szbMessage, COM_SIZE(szbMessage) * 0x02, FALSE);
 }
 
@@ -24,7 +23,6 @@ VOID WINAPI OnRecvMessage(BSTR szbMessage)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI OnSendMessage(BSTR *szbMessage)
 {
-
     Engine::NetMessage((LPBYTE) *szbMessage, COM_SIZE(*szbMessage) * 0x02, TRUE);
 }
 
@@ -33,7 +31,6 @@ VOID WINAPI OnSendMessage(BSTR *szbMessage)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI OnLoop()
 {
-
     Engine::NetHandle();
 }
 
@@ -139,6 +136,5 @@ VOID Foundation::OnReceive(LPCSTR szwData, DWORD dwLength)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 WORD Foundation::GetPort()
 {
-
     return 10001;
 }
