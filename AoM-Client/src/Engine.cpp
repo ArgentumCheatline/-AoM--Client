@@ -172,7 +172,7 @@ VOID Engine::NetHandle()
 {
     if (m_Socket == NULL)
     {
-        DWORD dwLastTime = GetTickCount();
+        DWORD dwLastTime = fnGetTickCount();
 
         //!
         //! Reconnect the socket.
