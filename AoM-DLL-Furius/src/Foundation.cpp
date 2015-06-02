@@ -8,7 +8,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 static TDetour m_RecvDetour;
 static TDetour m_SendDetour;
-static TDetour m_GetTickCountDetour;
+static TDetour m_LoopDetour;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// TRAMPOLINE
@@ -39,7 +39,7 @@ VOID WINAPI OnLoop()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 GENERATE_METHOD_1F(HkRcvData,      OnRecvMessage,  m_RecvDetour.lpTrampoline);
 GENERATE_METHOD_1F(HkSndData,      OnSendMessage,  m_SendDetour.lpTrampoline);
-GENERATE_METHOD_0F(HkGetTickCount, OnLoop,         m_GetTickCountDetour.lpTrampoline);
+GENERATE_METHOD_0F(HkLoop,         OnLoop,         m_LoopDetour.lpTrampoline);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// IMPLEMENTATION
@@ -52,7 +52,7 @@ VOID Foundation::OnCreate()
     TAction nAction;
     nAction.lpAddress   = (LPVOID) 0x600000;
     nAction.lpFunction  = (LPVOID) &HkRcvData;
-    nAction.szwcPattern = "\x85\xC9\x74\x33\xC7\x45\xFC\xF4\x00\x00\x00\x8B"
+    nAction.szwcPattern = "\x85\xC9\x74\x33\xC7\x45\xFC\x04\x00\x00\x00\x8B"
                           "\x95\x18\xFF\xFF\xFF\x52\xFF\x15\xFF\xFF\xFF\xFF"
                           "\x83\xE8\x01";
     nAction.szwcMask    = "xxxxxxxxxxxxxxxxxxxx????xxx";
@@ -70,10 +70,15 @@ VOID Foundation::OnCreate()
     Memory::MmWrite(nAction, &m_SendDetour);
 
     //!
-    //! [DETOUR] GetTickCount
+    //! [DETOUR] FuriusAO (Loop)
     //!
-    LPVOID lpMethod = EngineAPI::GetFunction(EngineAPI::GetModule(MODULE_KERNEL), 0xF791FB23);
-    Memory::MmWrite(lpMethod, (LPVOID) &HkGetTickCount, &m_GetTickCountDetour);
+    nAction.lpAddress   = (LPVOID) 0x600000;
+    nAction.lpFunction  = (LPVOID) &HkLoop;
+    nAction.szwcPattern = "\xFF\x15\xFF\xFF\xFF\xFF\xE9\xFF\xFF\xFF\xFF\xC7"
+                          "\x45\xFC\xAE\x01\x00\x00\x66\xC7\x05\xFF\xFF\xFF"
+                          "\xFF\x00\x00\xC7\x45\xFC\xAF\x01\x00\x00";
+    nAction.szwcMask    = "xx????x????xxxxxxxxxx????xxxxxxxxx";
+    Memory::MmWrite(nAction, &m_LoopDetour, FALSE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -86,7 +91,7 @@ VOID Foundation::OnDestroy()
     //! 
     Memory::MmErase(m_RecvDetour);
     Memory::MmErase(m_SendDetour);
-    Memory::MmErase(m_GetTickCountDetour);
+    Memory::MmErase(m_LoopDetour);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

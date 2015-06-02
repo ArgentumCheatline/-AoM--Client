@@ -134,20 +134,35 @@ VOID Memory::MmErase(TDetour &pDetour)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 LPVOID Memory::MmWrite(TAction &pAction, TDetour *pBuffer)
 {
+    return MmWrite(pAction, pBuffer, TRUE);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+LPVOID Memory::MmWrite(TAction &pAction, TDetour *pBuffer, BOOL bBacktrace)
+{
     LPVOID lpMemory = Find(pAction.lpAddress, 0x00400000, pAction.szwcPattern, pAction.szwcMask);
 
 #ifdef _DEBUG_
     EngineAPI::StringDebugW(L"[W][Memory] Found memory pattern at 0x%X", lpMemory);
 #endif // _DEBUG_
 
-    if (lpMemory == NULL || (lpMemory = Backtrace(lpMemory)) == NULL)
+    if (lpMemory == NULL)
+    {
+        return NULL;
+    }
+    if (bBacktrace && (lpMemory = Backtrace(lpMemory)) == NULL)
     {
         return NULL;
     }
 
 #ifdef _DEBUG_
-    EngineAPI::StringDebugW(L"[W][Memory] Backtrace pattern to 0x%X", lpMemory);
+    if (bBacktrace)
+    {
+        EngineAPI::StringDebugW(L"[W][Memory] Backtrace pattern to 0x%X", lpMemory);
+    }
 #endif // _DEBUG_
+
     MmWrite(lpMemory, pAction.lpFunction, pBuffer);
     return lpMemory;
 }

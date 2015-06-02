@@ -6,12 +6,10 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+FUNCTION (GetTickCount,             0xF791FB23, "GetTickCount");
 FUNCTION (LocalAlloc,               0x4C0297FA, "LocalAlloc");
 FUNCTION (LocalFree,                0x5CBAEAF6, "LocalFree");
 FUNCTION (OutputDebugStringW,       0x470D22D2, "OutputDebugStringW");
-FUNCTION (MultiByteToWideChar,      0xEF4AC4E4, "MultiByteToWideChar");
-FUNCTION (StringCopyW,              0xCB9B4A11, "lstrcpyW");
-FUNCTION (StringSizeW,              0xDD434751, "lstrlenW");
 FUNCTION (VirtualAllocEx,           0x6E1A959C, "VirtualAllocEx");
 FUNCTION (VirtualFreeEx,            0xC3B4EB78, "VirtualFreeEx");
 FUNCTION (VirtualProtectEx,         0x53D98756, "VirtualProtectEx");
@@ -53,7 +51,7 @@ FUNCTION (Htonl,                    0xEB769C2C, "htonl");
 VOID EngineAPI::Constructor()
 {
     GetModuleTable(GetModule(MODULE_KERNEL),
-                   (LPVOID) &fnLocalAlloc,
+                   (LPVOID) &fnGetTickCount,
                    (LPVOID) &fnVirtualProtectEx);
     GetModuleTable(GetModule(MODULE_NTDLL),
                    (LPVOID) &fnRtlCompareMemory,

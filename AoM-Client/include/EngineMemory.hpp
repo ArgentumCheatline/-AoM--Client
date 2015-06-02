@@ -250,6 +250,16 @@ namespace Memory
     ////////////////////////////////////////////////////////////////////////////////////////////////
     /// Writes a detour
     ///
+    /// \param[in]      pAction    The action of the detour
+    /// \param[out opt] pBuffer    The buffer to store the memory
+    /// \param[in]      bBacktrace True if should backtrace the method, false otherwise
+    /// \return The address of the function
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    LPVOID MmWrite(TAction &pAction, TDetour *pBuffer, BOOL bBacktrace);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Writes a detour
+    ///
     /// \param[in]      lpAddress     The source to detour
     /// \param[in]      lpDestination The destination of the detour
     /// \param[out opt] pBuffer       The buffer to store the memory

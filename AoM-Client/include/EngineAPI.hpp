@@ -52,18 +52,13 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Kernel32.DLL [Definition]
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef BOOL    (WINAPI *FnFreeLibrary)(HMODULE);
+typedef DWORD   (WINAPI *FnGetTickCount)();
 typedef HLOCAL  (WINAPI *FnLocalAlloc)(UINT, SIZE_T);
 typedef HLOCAL  (WINAPI *FnLocalFree)(HLOCAL);
 typedef VOID    (WINAPI *FnOutputDebugStringW)(LPCWSTR);
-typedef VOID    (WINAPI *FnMultiByteToWideChar)(UINT, DWORD, LPCSTR, INT, LPWSTR, INT);
-typedef INT     (WINAPI *FnStringCompareW)(LPCWSTR, LPCWSTR);
-typedef LPWSTR  (WINAPI *FnStringCopyW)(LPWSTR, LPWSTR);
-typedef INT     (WINAPI *FnStringSizeW)(LPCWSTR);
 typedef LPVOID  (WINAPI *FnVirtualAllocEx)(HANDLE, LPVOID, SIZE_T, DWORD, DWORD);
 typedef BOOL    (WINAPI *FnVirtualFreeEx)(HANDLE, LPVOID, SIZE_T, DWORD);
 typedef BOOL    (WINAPI *FnVirtualProtectEx)(HANDLE, LPVOID, SIZE_T, DWORD, PDWORD);
-typedef INT     (WINAPI *FnWideCharToMultiByte)(UINT, DWORD, LPCWSTR, INT, LPSTR, INT, LPCSTR, LPBOOL);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // OLEAUT.DLL [Definition]
@@ -103,12 +98,10 @@ typedef u_long  (WSAAPI *FnHtonl)(u_long);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Kernel32.DLL [Table]
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+extern FnGetTickCount               fnGetTickCount;
 extern FnLocalAlloc                 fnLocalAlloc;
 extern FnLocalFree                  fnLocalFree;
 extern FnOutputDebugStringW         fnOutputDebugStringW;
-extern FnMultiByteToWideChar        fnMultiByteToWideChar;
-extern FnStringCopyW                fnStringCopyW;
-extern FnStringSizeW                fnStringSizeW;
 extern FnVirtualAllocEx             fnVirtualAllocEx;
 extern FnVirtualFreeEx              fnVirtualFreeEx;
 extern FnVirtualProtectEx           fnVirtualProtectEx;

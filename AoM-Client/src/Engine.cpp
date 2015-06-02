@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 static SOCKET m_Socket;
+static DWORD  m_SocketReconnectTime;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ENTRY-POINT-DLL
@@ -44,11 +45,6 @@ VOID Engine::Constructor(HMODULE hModule)
     //! INIT: namespace Foundation
     //!
     Foundation::OnCreate();
-
-    //!
-    //! INIT: Connection
-    //!
-    Engine::NetConnect();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,7 +79,7 @@ VOID Engine::NetConnect()
     fnRtlFillMemory(&lpServer, sizeof(struct sockaddr_in), 0);
     lpServer.sin_family      = AF_INET;
     lpServer.sin_addr.s_addr = fnHtonl(INADDR_LOOPBACK);
-    lpServer.sin_port        = fnHtons(10000);  // Port: 10000
+    lpServer.sin_port        = fnHtons(PROTOCOL_PORT);
 
     ///
     /// Create the socket
@@ -118,7 +114,7 @@ VOID Engine::NetConnect()
     ///
     /// Set TIMEOUT
     ///
-    INT dwSocketTimeout = 60000;  // 60 Seconds
+    INT dwSocketTimeout = 5000;
     fnSocketSetOption(hSocket, SOL_SOCKET, SO_RCVTIMEO, &dwSocketTimeout, sizeof(dwSocketTimeout));
     fnSocketSetOption(hSocket, SOL_SOCKET, SO_SNDTIMEO, &dwSocketTimeout, sizeof(dwSocketTimeout));
     m_Socket = hSocket;
@@ -143,6 +139,7 @@ VOID Engine::NetMessage(LPBYTE pbBuffer, INT iLength, BOOL bClientSide)
     {
         return;
     }
+
 
     //!
     //! Allocate memory for the message.
@@ -175,7 +172,19 @@ VOID Engine::NetHandle()
 {
     if (m_Socket == NULL)
     {
-        return;
+        DWORD dwLastTime = GetTickCount();
+
+        //!
+        //! Reconnect the socket.
+        //!
+        if (dwLastTime - m_SocketReconnectTime >= PROTOCOL_RECONNECT_TIME)
+        {
+            m_SocketReconnectTime = dwLastTime;
+            NetConnect();
+        }
+
+        if (m_Socket == NULL)
+            return;
     }
 
     //!
