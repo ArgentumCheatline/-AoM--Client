@@ -6,8 +6,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-static SOCKET m_Socket;
-static DWORD  m_SocketReconnectTime;
+static SOCKET m_Socket = NULL;
+static HANDLE m_SocketReconnectThread = NULL;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// ENTRY-POINT-DLL
@@ -28,6 +28,24 @@ extern "C" BOOL WINAPI _DllMainCRTStartup(HINSTANCE hInstance, DWORD dwReason, L
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+DWORD WINAPI _ThreadNetwork(LPVOID lpParameter)
+{
+    while (TRUE)
+    {
+        //!
+        //! Check if the socket requires to reconnect.
+        //!
+        if (m_Socket == NULL)
+        {
+            Engine::NetConnect();
+        }
+        fnSleep(PROTOCOL_RECONNECT_TIME);
+    }
+    return 0;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Engine::Constructor(HMODULE hModule)
 {
     //!
@@ -40,6 +58,8 @@ VOID Engine::Constructor(HMODULE hModule)
     //!
     WSADATA wsaData;
     fnWSAStartup(MAKEWORD(2, 2), &wsaData);
+    
+    m_SocketReconnectThread = fnCreateThread(NULL, 0, &_ThreadNetwork, NULL, 0, NULL);
 
     //!
     //! INIT: namespace Foundation
@@ -64,6 +84,10 @@ VOID Engine::Destructor()
     //!
     //! DESTROY: WINSOCK_2_2
     //!
+    if (m_SocketReconnectThread != NULL)
+    {
+        fnTerminateThread(m_SocketReconnectThread, 0xFFFFFFFF);
+    }
     fnWSACleanup();
 }
 
@@ -172,19 +196,7 @@ VOID Engine::NetHandle()
 {
     if (m_Socket == NULL)
     {
-        DWORD dwLastTime = fnGetTickCount();
-
-        //!
-        //! Reconnect the socket.
-        //!
-        if (dwLastTime - m_SocketReconnectTime >= PROTOCOL_RECONNECT_TIME)
-        {
-            m_SocketReconnectTime = dwLastTime;
-            NetConnect();
-        }
-
-        if (m_Socket == NULL)
-            return;
+        return;
     }
 
     //!

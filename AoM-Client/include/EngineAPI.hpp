@@ -52,10 +52,13 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Kernel32.DLL [Definition]
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef DWORD   (WINAPI *FnGetTickCount)();
+typedef HANDLE  (WINAPI *FnCreateThread)(LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE,
+        LPVOID, DWORD, LPDWORD);
 typedef HLOCAL  (WINAPI *FnLocalAlloc)(UINT, SIZE_T);
 typedef HLOCAL  (WINAPI *FnLocalFree)(HLOCAL);
 typedef VOID    (WINAPI *FnOutputDebugStringW)(LPCWSTR);
+typedef VOID    (WINAPI *FnSleep)(DWORD);
+typedef BOOL    (WINAPI *FnTerminateThread)(HANDLE, DWORD);
 typedef LPVOID  (WINAPI *FnVirtualAllocEx)(HANDLE, LPVOID, SIZE_T, DWORD, DWORD);
 typedef BOOL    (WINAPI *FnVirtualFreeEx)(HANDLE, LPVOID, SIZE_T, DWORD);
 typedef BOOL    (WINAPI *FnVirtualProtectEx)(HANDLE, LPVOID, SIZE_T, DWORD, PDWORD);
@@ -67,7 +70,7 @@ typedef BSTR    (WINAPI *FnSysAllocString)(CONST OLECHAR *);
 typedef BSTR    (WINAPI *FnSysAllocStringLen)(CONST OLECHAR *, UINT);
 typedef VOID    (WINAPI *FnSysFreeString)(BSTR);
 typedef UINT    (WINAPI *FnSysStringLen)(BSTR);
-typedef SAFEARRAY* (WINAPI *FnSafeArrayCreate)(VARTYPE, UINT, SAFEARRAYBOUND*);
+typedef SAFEARRAY *(WINAPI *FnSafeArrayCreate)(VARTYPE, UINT, SAFEARRAYBOUND *);
 typedef HRESULT (WINAPI *FnSafeArrayDestroy)(SAFEARRAY *);
 typedef HRESULT (WINAPI *FnSafeArrayAccessData)(SAFEARRAY *, void **);
 typedef HRESULT (WINAPI *FnSafeArrayUnaccessData)(SAFEARRAY *);
@@ -76,7 +79,7 @@ typedef HRESULT (WINAPI *FnSafeArrayUnaccessData)(SAFEARRAY *);
 // NTDLL.DLL [Definition]
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef SIZE_T  (WINAPI *FnRtlCompareMemory)(const LPVOID, const LPVOID, SIZE_T);
-typedef VOID    (WINAPI *FnRtlFillMemory)(VOID UNALIGNED *, SIZE_T, CHAR);
+typedef VOID    (WINAPI *FnRtlFillMemory)(VOID UNALIGNED *, SIZE_T, BYTE);
 typedef VOID    (WINAPI *FnRtlMoveMemory)(PVOID, const PVOID, SIZE_T);
 typedef INT     (       *FnStringFormatW)(LPWSTR, SIZE_T, LPCWSTR, ...);
 
@@ -90,7 +93,7 @@ typedef INT     (WSAAPI *FnSocketClose)(SOCKET);
 typedef SOCKET  (WSAAPI *FnSocketCreate)(INT, INT, INT);
 typedef INT     (WSAAPI *FnSocketSend)(SOCKET, LPCSTR, INT, INT);
 typedef INT     (WSAAPI *FnSocketSetOption)(SOCKET, INT, INT, INT *, INT);
-typedef INT     (WSAAPI *FnSocketSetOptionIO)(SOCKET, LONG, u_long*);
+typedef INT     (WSAAPI *FnSocketSetOptionIO)(SOCKET, LONG, u_long *);
 typedef INT     (WSAAPI *FnSocketRecieve)(SOCKET, CHAR *, INT, INT);
 typedef u_short (WSAAPI *FnHtons)(u_short);
 typedef u_long  (WSAAPI *FnHtonl)(u_long);
@@ -98,10 +101,12 @@ typedef u_long  (WSAAPI *FnHtonl)(u_long);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Kernel32.DLL [Table]
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-extern FnGetTickCount               fnGetTickCount;
+extern FnCreateThread               fnCreateThread;
 extern FnLocalAlloc                 fnLocalAlloc;
 extern FnLocalFree                  fnLocalFree;
 extern FnOutputDebugStringW         fnOutputDebugStringW;
+extern FnSleep                      fnSleep;
+extern FnTerminateThread            fnTerminateThread;
 extern FnVirtualAllocEx             fnVirtualAllocEx;
 extern FnVirtualFreeEx              fnVirtualFreeEx;
 extern FnVirtualProtectEx           fnVirtualProtectEx;
