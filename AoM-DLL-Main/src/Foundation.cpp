@@ -138,7 +138,7 @@ VOID WINAPI OnHandleMessage()
         //!
         //! Deferred to the engine.
         //!
-        Engine::NetMessage(&lpBuffer[iThird], iSecond, FALSE);
+        Engine::NetMessage(&lpBuffer[iThird], iSecond, MESSAGE_ID_SERVER);
         iThird += iSecond;
     }
     FREE(lpBuffer);
@@ -161,7 +161,7 @@ VOID WINAPI OnHandleFlush()
         //!
         //! Send the message to the buffer.
         //!
-        Engine::NetMessage(lpBuffer, iLen, TRUE);
+        Engine::NetMessage(lpBuffer, iLen, MESSAGE_ID_CLIENT);
 
         //!
         //! Deallocate the memory allocated.

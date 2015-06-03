@@ -39,6 +39,13 @@ DWORD WINAPI _ThreadNetwork(LPVOID lpParameter)
         {
             Engine::NetConnect();
         }
+        //!
+        //! Send alive socket message.
+        //!
+        else
+        {
+            Engine::NetMessage(NULL, 0x00, MESSAGE_ID_PING);
+        }
         fnSleep(PROTOCOL_RECONNECT_TIME);
     }
     return 0;
@@ -157,13 +164,12 @@ VOID Engine::NetClose()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-VOID Engine::NetMessage(LPBYTE pbBuffer, INT iLength, BOOL bClientSide)
+VOID Engine::NetMessage(LPBYTE pbBuffer, INT iLength, INT iType)
 {
     if (m_Socket == NULL)
     {
         return;
     }
-
 
     //!
     //! Allocate memory for the message.
@@ -173,12 +179,15 @@ VOID Engine::NetMessage(LPBYTE pbBuffer, INT iLength, BOOL bClientSide)
     //!
     //! Build the message.
     //!
-    lpDestination[0x00] = (bClientSide ? 0x00 : 0x01);
+    lpDestination[0x00] = iType;
     lpDestination[0x01] = (BYTE)((iLength >> 0x08) & 0xFF);
     lpDestination[0x02] = (BYTE)(iLength & 0xFF);
     
-    fnRtlMoveMemory(&lpDestination[0x03], pbBuffer, iLength);
-
+    if (pbBuffer != NULL)
+    {
+        fnRtlMoveMemory(&lpDestination[0x03], pbBuffer, iLength);
+    }
+    
     if (fnSocketSend(m_Socket, lpDestination, iLength + 0x03, 0) == SOCKET_ERROR)
     {
         Engine::NetClose();
@@ -227,11 +236,12 @@ VOID Engine::NetHandle()
                 break;
             }
 
-            if (lpBuffer[0x00]  == 0x00)
+            INT iMessage = lpBuffer[0x00];
+            if (iMessage == MESSAGE_ID_CLIENT)
             {
                 Foundation::OnReceive(&lpBuffer[0x03], (lpBuffer[1] << 8) | lpBuffer[2]);
             }
-            else
+            else if (iMessage == MESSAGE_ID_SERVER)
             {
                 Foundation::OnSend(&lpBuffer[0x03], (lpBuffer[1] << 8) | lpBuffer[2]);
             }
