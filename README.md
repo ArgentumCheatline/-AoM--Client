@@ -6,7 +6,7 @@
 -----------------
 AoM is a modding platform for Argentum Online. Read more about AoM [here][AoM Wiki]
 
-Copyright (c) 2015 AoW Powered <https://github.com/AO-Modding>
+Copyright (c) 2015 AoM Powered <https://github.com/AO-Modding>
 
 ![VP Bullet] License
 -----------------
