@@ -11,7 +11,7 @@ Copyright (c) 2015 AoW Powered <https://github.com/AO-Modding>
 ![VP Bullet] License
 -----------------
 AoM is licensed under [Apache License, Version 2.0][AoM License], 
-Please see the `LICENSE.txt` file for details.
+Please see the `LICENSE` file for details.
 
 ![VP Bullet] Contributing
 -----------------
@@ -43,7 +43,7 @@ contributions from the public. We'd like you to be a part of that community.
 **Please follow the above conventions if you want your pull request(s) accepted.**
 
 
-[AoM License]: https://github.com/AO-Modding/-AoM--Client/LICENSE.txt
+[AoM License]: https://github.com/AO-Modding/-AoM--Client/LICENSE
 [AoM Site]: https://github.com/AO-Modding/
 [AoM Wiki]: https://github.com/AO-Modding/-AoM--Client/wiki
 
