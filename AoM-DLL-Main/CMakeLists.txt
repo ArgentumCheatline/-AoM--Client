@@ -33,7 +33,6 @@ INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../AoM-Client/include")
 FILE(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 FILE(GLOB_RECURSE SOURCES_X "${CMAKE_CURRENT_SOURCE_DIR}/../AoM-Client/src/*.cpp")
 
-
 ##
 ## Make the executable
 ##

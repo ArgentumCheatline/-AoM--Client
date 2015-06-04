@@ -193,7 +193,6 @@ VOID Foundation::OnCreate()
     m_QueueWrite = (LPVOID) *(LPDWORD)(lpSendDataWriteBuffer);
     m_QueueRead  = (LPVOID) *(LPDWORD)(lpSendDataWriteBuffer - 0x04);
 
-
     //!
     //! [GET] ClsByteQueue methods.
     //!
