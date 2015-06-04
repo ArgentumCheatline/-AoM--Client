@@ -1,4 +1,4 @@
-<img style="float: center" src="http://i.imgur.com/omxNp8G.jpg">
+-> [![AoM Logo][AoM Logo]][AoM Site] <-
 
 ![VP Bullet] What is AoM? 
 -----------------
