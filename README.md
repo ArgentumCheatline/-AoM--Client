@@ -1,6 +1,4 @@
-<div>
-[![AoM Logo][AoM Logo]][AoM Site]
-</div>
+<div style="text-align:center"><img src ="http://i.imgur.com/omxNp8G.jpg"/></div>
 
 ![VP Bullet] What is AoM? 
 -----------------
@@ -41,6 +39,7 @@ contributions from the public. We'd like you to be a part of that community.
 * Number of commits in a pull request should be kept to *one commit* and all additional commits must be *squashed*.
 
 **Please follow the above conventions if you want your pull request(s) accepted.**
+
 
 [AoM License]: https://github.com/AO-Modding/-AoM--Client/LICENSE.txt
 [AoM Site]: https://github.com/AO-Modding/
