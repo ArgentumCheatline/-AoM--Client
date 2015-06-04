@@ -26,7 +26,6 @@
 *.exe
 *.out
 *.app
-*.cmd
 
 # Build folder
 **/build/
