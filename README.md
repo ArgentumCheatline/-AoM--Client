@@ -1,4 +1,4 @@
-[![AoM Logo][AoM Logo]][AoM Site]
+<img style="float: center" src="http://i.imgur.com/omxNp8G.jpg">
 
 ![VP Bullet] What is AoM? 
 -----------------
@@ -40,7 +40,6 @@ contributions from the public. We'd like you to be a part of that community.
 
 **Please follow the above conventions if you want your pull request(s) accepted.**
 
-[AoM Logo]: http://i.imgur.com/omxNp8G.jpg
 [AoM License]: https://github.com/AO-Modding/-AoM--Client/LICENSE.txt
 [AoM Site]: https://github.com/AO-Modding/
 [AoM Wiki]: https://github.com/AO-Modding/-AoM--Client/wiki
