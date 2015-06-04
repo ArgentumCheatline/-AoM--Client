@@ -1,4 +1,6 @@
--> [![AoM Logo][AoM Logo]][AoM Site] <-
+<div>
+[![AoM Logo][AoM Logo]][AoM Site]
+</div>
 
 ![VP Bullet] What is AoM? 
 -----------------
