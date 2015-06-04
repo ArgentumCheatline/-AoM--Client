@@ -1,4 +1,6 @@
-<div style="text-align:center"><img src ="http://i.imgur.com/omxNp8G.jpg"/></div>
+<p align="center">
+  <img src ="http://i.imgur.com/omxNp8G.jpg"/>
+</p>
 
 ![VP Bullet] What is AoM? 
 -----------------
