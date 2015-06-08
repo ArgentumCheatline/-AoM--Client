@@ -192,6 +192,11 @@ VOID Foundation::OnCreate()
     DWORD lpSendDataWriteBuffer = *(LPDWORD)(((LPBYTE) lpSendDataMethod) + 0x08);
     m_QueueWrite = (LPVOID) *(LPDWORD)(lpSendDataWriteBuffer);
     m_QueueRead  = (LPVOID) *(LPDWORD)(lpSendDataWriteBuffer - 0x04);
+#ifdef _DEBUG_
+    EngineAPI::StringDebugW(L"[W][Memory] Write[0x%X] Read[0x%X]", 
+        (DWORD) m_QueueWrite, 
+        (DWORD) m_QueueRead);
+#endif // _DEBUG_
 
     //!
     //! [GET] ClsByteQueue methods.
@@ -213,6 +218,12 @@ VOID Foundation::OnCreate()
             "\xFF\x50\x04\x8B\x45\x10\x89\x7D\xE8\x3B\xC7\x89"
             "\x7D\xE4\x7E\x18",
             "xxxxxxxxxxxxxxxx"));
+#ifdef _DEBUG_
+    EngineAPI::StringDebugW(L"[W][Memory] .Length[0x%X] .Write[0x%X] .Peek[0x%X]", 
+        (DWORD) m_QueueLengthMethod, 
+        (DWORD) m_QueueWriteMethod,
+        (DWORD) m_QueuePeekMethod);
+#endif // _DEBUG_
 
     //!
     //! [DETOUR] MainAO (Handle)
