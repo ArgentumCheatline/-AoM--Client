@@ -123,7 +123,7 @@ VOID WINAPI OnHandleMessage()
     //! Parse while there is data available.
     //!
     while (iFirst > 0)
-    {
+    {        
         //!
         //! Call the method to parse the message.
         //!
@@ -185,13 +185,19 @@ VOID Foundation::OnCreate()
     //!
     //! [GET] Buffers
     //!
-    LPVOID lpSendDataMethod = Memory::Find((LPVOID) 0x510000, 0x100000, 
+    LPVOID lpRecvDataMethod = Memory::Find((LPVOID) 0x410000, 0x200000, 
+            "\xA1\xFF\xFF\xFF\xFF\x8D\x4D\xA8\x51\x8D\x4D\xE4\x8B\x10\x6A\xFF\x51\x50",
+            "x????xxxxxxxxxxxxx");
+    DWORD lpRecvDataReadBuffer = *(LPDWORD)(((LPBYTE) lpRecvDataMethod) + 0x01);
+    m_QueueRead = (LPVOID) *(LPDWORD)(lpRecvDataReadBuffer);
+
+    LPVOID lpSendDataMethod = Memory::Find((LPVOID) 0x510000, 0x200000, 
             "\xFF\xD7\x66\x85\xF6\x74\x3E\xA1\xFF\xFF\xFF\xFF"
             "\x8D\x55\xA0\x52",
             "xxxxxxxx????xxxx");
     DWORD lpSendDataWriteBuffer = *(LPDWORD)(((LPBYTE) lpSendDataMethod) + 0x08);
-    m_QueueWrite = (LPVOID) *(LPDWORD)(lpSendDataWriteBuffer);
-    m_QueueRead  = (LPVOID) *(LPDWORD)(lpSendDataWriteBuffer - 0x04);
+    m_QueueWrite  = (LPVOID) *(LPDWORD)(lpSendDataWriteBuffer);
+
 #ifdef _DEBUG_
     EngineAPI::StringDebugW(L"[W][Memory] Write[0x%X] Read[0x%X]", 
         (DWORD) m_QueueWrite, 
