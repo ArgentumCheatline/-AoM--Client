@@ -37,14 +37,14 @@ typedef struct _TAction
 #define METHOD_EPILOGUE(X)                                              \
     __asm PUSH EBP                                                      \
     __asm MOV  EBP, ESP                                                 \
-    __asm SUB  ESP, X                                                   \
     __asm PUSHAD                                                        \
-    __asm PUSHFD
+    __asm PUSHFD                                                        
 #define METHOD_PROLOGUE(X)                                              \
     __asm POPFD                                                         \
     __asm POPAD                                                         \
-    __asm POP  EBP                                                      \
-    __asm ADD  ESP, X               
+    __asm MOV  ESP, EBP                                                 \
+    __asm POP  EBP                                                      
+                  
 #define METHOD_JUMP(X)                                                  \
     __asm JMP X
 #define METHOD_RETN(X)                                                  \

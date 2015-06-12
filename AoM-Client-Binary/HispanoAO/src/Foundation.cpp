@@ -286,6 +286,10 @@ VOID Foundation::OnDestroy()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnSend(LPCSTR szwData, DWORD dwLength)
 {
+    if (*m_QueueWrite == NULL)
+    {
+        return;
+    }
     QueueWrite(*m_QueueWrite, (LPBYTE) szwData, dwLength);
 
     //!
@@ -299,6 +303,10 @@ VOID Foundation::OnSend(LPCSTR szwData, DWORD dwLength)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnReceive(LPCSTR szwData, DWORD dwLength)
 {
+    if (*m_QueueRead == NULL)
+    {
+        return;
+    }
     QueueWrite(*m_QueueRead, (LPBYTE) szwData, dwLength);
 
     //!
