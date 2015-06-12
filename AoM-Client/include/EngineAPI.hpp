@@ -56,12 +56,14 @@ typedef HANDLE  (WINAPI *FnCreateThread)(LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD
         LPVOID, DWORD, LPDWORD);
 typedef HLOCAL  (WINAPI *FnLocalAlloc)(UINT, SIZE_T);
 typedef HLOCAL  (WINAPI *FnLocalFree)(HLOCAL);
+typedef INT     (WINAPI *FnMultiByteToWideChar)(UINT, DWORD, LPCSTR, INT, LPWSTR, INT);
 typedef VOID    (WINAPI *FnOutputDebugStringW)(LPCWSTR);
 typedef VOID    (WINAPI *FnSleep)(DWORD);
 typedef BOOL    (WINAPI *FnTerminateThread)(HANDLE, DWORD);
 typedef LPVOID  (WINAPI *FnVirtualAllocEx)(HANDLE, LPVOID, SIZE_T, DWORD, DWORD);
 typedef BOOL    (WINAPI *FnVirtualFreeEx)(HANDLE, LPVOID, SIZE_T, DWORD);
 typedef BOOL    (WINAPI *FnVirtualProtectEx)(HANDLE, LPVOID, SIZE_T, DWORD, PDWORD);
+typedef INT     (WINAPI *FnWideCharToMultiByte)(UINT, DWORD, LPCWSTR, INT, LPSTR, INT, LPCSTR, LPBOOL);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // OLEAUT.DLL [Definition]
@@ -104,12 +106,14 @@ typedef u_long  (WSAAPI *FnHtonl)(u_long);
 extern FnCreateThread               fnCreateThread;
 extern FnLocalAlloc                 fnLocalAlloc;
 extern FnLocalFree                  fnLocalFree;
+extern FnMultiByteToWideChar        fnMultiByteToWideChar;
 extern FnOutputDebugStringW         fnOutputDebugStringW;
 extern FnSleep                      fnSleep;
 extern FnTerminateThread            fnTerminateThread;
 extern FnVirtualAllocEx             fnVirtualAllocEx;
 extern FnVirtualFreeEx              fnVirtualFreeEx;
 extern FnVirtualProtectEx           fnVirtualProtectEx;
+extern FnWideCharToMultiByte        fnWideCharToMultiByte;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // OLEAUT.DLL [Table]
@@ -222,6 +226,24 @@ namespace EngineAPI
     /// \param     ....       Any number of arguments
     ////////////////////////////////////////////////////////////////////////////////////////////////
     VOID StringDebugW(LPCWSTR szwcFormat, ...);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Transform a wide unicode string into an ascii string.
+    ///
+    /// \param[in] szwcSource    The source
+    /// \param[in] szDestination The destination
+    /// \param[in] dwLen         The size
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    DWORD WideUnicodeToAscii(LPCWSTR szwcSource, LPSTR *szDestination, DWORD dwLen);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Transform an ascii string into a wide unicode string.
+    ///
+    /// \param[in] szwcSource    The source
+    /// \param[in] szDestination The destination
+    /// \param[in] dwLen         The size
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    DWORD WideUnicodeFromAscii(LPCSTR szcSource, LPWSTR *szwDestination, DWORD dwLen);
 };
 
 #endif // _ENGINE_API_HPP_

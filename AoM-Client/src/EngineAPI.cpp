@@ -9,12 +9,14 @@
 FUNCTION (CreateThread,             0xCA2BD06B, "CreateThread");
 FUNCTION (LocalAlloc,               0x4C0297FA, "LocalAlloc");
 FUNCTION (LocalFree,                0x5CBAEAF6, "LocalFree");
+FUNCTION (MultiByteToWideChar,      0xEF4AC4E4, "MultiByteToWideChar");
 FUNCTION (OutputDebugStringW,       0x470D22D2, "OutputDebugStringW");
 FUNCTION (Sleep,                    0xDB2D49B0, "Sleep");
 FUNCTION (TerminateThread,          0xBD016F89, "TerminateThread");
 FUNCTION (VirtualAllocEx,           0x6E1A959C, "VirtualAllocEx");
 FUNCTION (VirtualFreeEx,            0xC3B4EB78, "VirtualFreeEx");
 FUNCTION (VirtualProtectEx,         0x53D98756, "VirtualProtectEx");
+FUNCTION (WideCharToMultiByte,      0xC1634AF9, "WideCharToMultiByte");
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +56,7 @@ VOID EngineAPI::Constructor()
 {
     GetModuleTable(GetModule(MODULE_KERNEL),
                    (LPVOID) &fnCreateThread,
-                   (LPVOID) &fnVirtualProtectEx);
+                   (LPVOID) &fnWideCharToMultiByte);
     GetModuleTable(GetModule(MODULE_NTDLL),
                    (LPVOID) &fnRtlCompareMemory,
                    (LPVOID) &fnStringFormatW);
@@ -190,4 +192,31 @@ VOID EngineAPI::StringDebugW(LPCWSTR szwcFormat, ...)
     // Release the memory
     //
     FREE (szBuffer);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+DWORD EngineAPI::WideUnicodeToAscii(LPCWSTR szwcSource, LPSTR *szDestination, DWORD dwLen)
+{
+    DWORD iRequired = fnWideCharToMultiByte(CP_ACP, 0, szwcSource, dwLen, NULL, 0, 0, NULL);
+
+    *szDestination = ALLOCATE_ARRAY(CHAR, iRequired);
+    {
+        fnWideCharToMultiByte(CP_UTF8, 0, szwcSource, dwLen, *szDestination, iRequired, 0, NULL);
+    }
+    return iRequired;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+DWORD EngineAPI::WideUnicodeFromAscii(LPCSTR szcSource, LPWSTR *szwDestination, DWORD dwLen)
+{
+    DWORD iRequired = fnMultiByteToWideChar(CP_ACP, 0, szcSource, dwLen, NULL, 0);
+
+    *szwDestination = ALLOCATE_ARRAY(WCHAR, iRequired + 0x01);
+    {
+        fnMultiByteToWideChar(CP_ACP, 0, szcSource, dwLen, *szwDestination, iRequired);
+        *((*szwDestination) + iRequired) = '\0';
+    }
+    return iRequired;
 }

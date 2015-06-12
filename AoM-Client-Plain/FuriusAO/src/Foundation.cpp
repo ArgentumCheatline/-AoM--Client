@@ -15,10 +15,15 @@ static TDetour m_LoopDetour;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI OnRecvMessage(BSTR szbMessage)
 {
-    //!
-    //! [CALL]
-    //!
-    Engine::NetMessage((LPBYTE) szbMessage, COM_SIZE(szbMessage) * 0x02, MESSAGE_ID_SERVER);
+    LPSTR szArray;
+    DWORD dwBytes = EngineAPI::WideUnicodeToAscii(szbMessage, &szArray, COM_SIZE(szbMessage));
+    {
+        //!
+        //! [CALL]
+        //!
+        Engine::NetMessage((LPBYTE) szArray, dwBytes, MESSAGE_ID_SERVER);   
+    }
+    FREE(szArray);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,10 +31,15 @@ VOID WINAPI OnRecvMessage(BSTR szbMessage)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI OnSendMessage(BSTR *szbMessage)
 {
-    //!
-    //! [CALL]
-    //!
-    Engine::NetMessage((LPBYTE) *szbMessage, COM_SIZE(*szbMessage) * 0x02, MESSAGE_ID_CLIENT);
+    LPSTR szArray;
+    DWORD dwBytes = EngineAPI::WideUnicodeToAscii(*szbMessage, &szArray, COM_SIZE(*szbMessage));
+    {
+        //!
+        //! [CALL]
+        //!
+        Engine::NetMessage((LPBYTE) szArray, dwBytes, MESSAGE_ID_CLIENT);   
+    }
+    FREE(szArray);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,20 +118,27 @@ VOID Foundation::OnDestroy()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnSend(LPCSTR szwData, DWORD dwLength)
 {
-    //!
-    //! Allocate the packet
-    //!
-    BSTR sbMessage = COM_ALLOCATE_STRING((LPCWSTR) szwData);
+    LPWSTR szwArray;
+    DWORD dwBytes = EngineAPI::WideUnicodeFromAscii(szwData, &szwArray, dwLength);
+    {
+        //!
+        //! Allocate the packet
+        //!
+        BSTR sbMessage = COM_ALLOCATE_STRING(szwArray);
 
-    //!
-    //! Send the packet
-    //!
-    ((VOID (WINAPI *)(BSTR *)) m_SendDetour.lpTrampoline)(&sbMessage);
+        //!
+        //! Send the packet
+        //!
+        __asm LEA  EAX, sbMessage
+        __asm PUSH EAX
+        __asm CALL m_SendDetour.lpTrampoline
 
-    //!
-    //! Free the packet
-    //!
-    COM_FREE(sbMessage);
+        //!
+        //! Free the packet
+        //!
+        COM_FREE(sbMessage);
+    }
+    FREE(szwArray);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,18 +146,24 @@ VOID Foundation::OnSend(LPCSTR szwData, DWORD dwLength)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnReceive(LPCSTR szwData, DWORD dwLength)
 {
-    //!
-    //! Allocate the packet
-    //!
-    BSTR sbMessage = COM_ALLOCATE_STRING((LPCWSTR) szwData);
+    LPWSTR szwArray;
+    DWORD dwBytes = EngineAPI::WideUnicodeFromAscii(szwData, &szwArray, dwLength);
+    {
+        //!
+        //! Allocate the packet
+        //!
+        BSTR sbMessage = COM_ALLOCATE_STRING(szwArray);
 
-    //!
-    //! Send the packet
-    //!
-    ((VOID (WINAPI *)(BSTR)) m_RecvDetour.lpTrampoline)(sbMessage);
+        //!
+        //! Send the packet
+        //!
+        __asm PUSH sbMessage
+        __asm CALL m_RecvDetour.lpTrampoline
 
-    //!
-    //! Free the packet
-    //!
-    COM_FREE(sbMessage);
+        //!
+        //! Free the packet
+        //!
+        COM_FREE(sbMessage);
+    }
+    FREE(szwArray);
 }
