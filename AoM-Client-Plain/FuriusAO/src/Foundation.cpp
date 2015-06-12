@@ -15,6 +15,9 @@ static TDetour m_LoopDetour;
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI OnRecvMessage(BSTR szbMessage)
 {
+    //!
+    //! [CALL]
+    //!
     Engine::NetMessage((LPBYTE) szbMessage, COM_SIZE(szbMessage) * 0x02, MESSAGE_ID_SERVER);
 }
 
@@ -23,6 +26,9 @@ VOID WINAPI OnRecvMessage(BSTR szbMessage)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI OnSendMessage(BSTR *szbMessage)
 {
+    //!
+    //! [CALL]
+    //!
     Engine::NetMessage((LPBYTE) *szbMessage, COM_SIZE(*szbMessage) * 0x02, MESSAGE_ID_CLIENT);
 }
 
@@ -31,6 +37,9 @@ VOID WINAPI OnSendMessage(BSTR *szbMessage)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID WINAPI OnLoop()
 {
+    //!
+    //! [CALL]
+    //!
     Engine::NetHandle();
 }
 
@@ -46,9 +55,9 @@ GENERATE_METHOD_0F(HkLoop,         OnLoop,         m_LoopDetour.lpTrampoline);
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnCreate()
 {
-    //!
-    //! [DETOUR] FuriusAO (Handle)
-    //!
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //! [DETOUR] Handle
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     TAction nAction;
     nAction.lpAddress   = (LPVOID) 0x600000;
     nAction.lpFunction  = (LPVOID) &HkRcvData;
@@ -58,9 +67,9 @@ VOID Foundation::OnCreate()
     nAction.szwcMask    = "xxxxxxxxxxxxxxxxxxxx????xxx";
     Memory::MmWrite(nAction, &m_RecvDetour);
 
-    //!
-    //! [DETOUR] FuriusAO (Send)
-    //!
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //! [DETOUR] Send
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     nAction.lpAddress   = (LPVOID) 0x600000;
     nAction.lpFunction  = (LPVOID) &HkSndData;
     nAction.szwcPattern = "\x50\x68\xFF\xFF\xFF\xFF\xFF\x15\xFF\xFF\xFF\xFF"
@@ -69,15 +78,15 @@ VOID Foundation::OnCreate()
     nAction.szwcMask    = "xx????xx????xxxx????xxxxxxxx";
     Memory::MmWrite(nAction, &m_SendDetour);
 
-    //!
-    //! [DETOUR] FuriusAO (Loop)
-    //!
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //! [DETOUR] Loop
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     nAction.lpAddress   = (LPVOID) 0x600000;
     nAction.lpFunction  = (LPVOID) &HkLoop;
     nAction.szwcPattern = "\xFF\x15\xFF\xFF\xFF\xFF\xE9\xFF\xFF\xFF\xFF\xC7"
-                          "\x45\xFC\xAE\x01\x00\x00\x66\xC7\x05\xFF\xFF\xFF"
-                          "\xFF\x00\x00\xC7\x45\xFC\xAF\x01\x00\x00";
-    nAction.szwcMask    = "xx????x????xxxxxxxxxx????xxxxxxxxx";
+                          "\x45\xFC\xFF\xFF\xFF\xFF\x66\xC7\x05\xFF\xFF\xFF"
+                          "\xFF\x00\x00\xC7\x45\xFC\xFF\xFF\xFF\xFF";
+    nAction.szwcMask    = "xx????x????xxx????xxx????xxxxx????";
     Memory::MmWrite(nAction, &m_LoopDetour, FALSE);
 }
 

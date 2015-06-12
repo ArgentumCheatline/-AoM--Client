@@ -1,0 +1,39 @@
+##
+## Requires CMake >3.2
+##
+CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
+
+##
+## The name of the project is "Proxy_Main"
+##
+PROJECT(Proxy_Main)
+
+##
+## Enable TINY_MODE (COMPILER)
+##
+SET(CMAKE_BUILD_TYPE "MINSIZEREL")
+SET(CMAKE_CXX_FLAGS "/Oy /Zl /EHs-c- /Os /GS- /Gy /Gd /Gm- /nologo /W3")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_DEBUG_") 
+
+##
+## Enable TINY_MODE (LINKER)
+##
+SET(CMAKE_SHARED_LINKER_FLAGS "/MANIFEST:NO /DYNAMICBASE:NO /OPT:REF /SAFESEH:NO /NOLOGO /NODEFAULTLIB") 
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /SECTION:.text,ERW /MERGE:.data=.rdata /MERGE:.rdata=.text /ignore:4254")
+SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DLL")
+
+##
+## Add the project includes
+##
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../../AoM-Client/include")
+
+##
+## Add the project files
+##
+FILE(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
+FILE(GLOB_RECURSE SOURCES_X "${CMAKE_CURRENT_SOURCE_DIR}/../../AoM-Client/src/*.cpp")
+
+##
+## Make the executable
+##
+ADD_LIBRARY(Proxy_Main SHARED ${SOURCES} ${SOURCES_X})

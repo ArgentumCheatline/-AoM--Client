@@ -6,8 +6,6 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-typedef VOID (WINAPI * ModProtocolHandleIncomingMessage)();
-typedef VOID (WINAPI * ModProtocolFlushBuffer)();
 typedef VOID (WINAPI * ClsByteQueueWriteBlock)(LPVOID, SAFEARRAY **, DWORD, LPINT);
 typedef VOID (WINAPI * ClsByteQueuePeekBlock)(LPVOID, SAFEARRAY **, DWORD, LPINT);
 typedef VOID (WINAPI * ClsByteQueueLength)(LPVOID, LPINT);
@@ -17,11 +15,12 @@ typedef VOID (WINAPI * ClsByteQueueLength)(LPVOID, LPINT);
 static ClsByteQueueLength     m_QueueLengthMethod;
 static ClsByteQueueWriteBlock m_QueueWriteMethod;
 static ClsByteQueuePeekBlock  m_QueuePeekMethod;
-static LPVOID                 m_QueueRead, m_QueueWrite;
+static LPVOID                *m_QueueRead, *m_QueueWrite;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-static TDetour m_HandleDetour, m_FlushDetour;
+static TDetour m_RecvDetour;
+static TDetour m_LoopDetour;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// HELPER
@@ -109,15 +108,19 @@ INT WINAPI QueuePeak(LPVOID lpQueue, LPBYTE lpBuffer, DWORD dwLen)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// TRAMPOLINE
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-VOID WINAPI OnHandleMessage()
+VOID WINAPI OnRecvMessage()
 {
-    INT iFirst = QueueLength(m_QueueRead), iSecond = 0, iThird = 0;
+    if (*m_QueueRead == NULL)
+    {
+        return;
+    }
+    INT iFirst = QueueLength(*m_QueueRead), iSecond = 0, iThird = 0;
 
     //!
     //! Retrieve the buffer of the messages.
     //!
     LPBYTE lpBuffer = ALLOCATE_ARRAY(BYTE, iFirst);
-    QueuePeak(m_QueueRead, lpBuffer, iFirst);
+    QueuePeak(*m_QueueRead, lpBuffer, iFirst);
 
     //!
     //! Parse while there is data available.
@@ -127,12 +130,12 @@ VOID WINAPI OnHandleMessage()
         //!
         //! Call the method to parse the message.
         //!
-        ((ModProtocolHandleIncomingMessage) m_HandleDetour.lpTrampoline)();
-        
+        __asm CALL m_RecvDetour.lpTrampoline
+
         //!
         //! Read how many bytes has taken from the lastest handle.
         //!
-        iSecond = iFirst - QueueLength(m_QueueRead);
+        iSecond = iFirst - QueueLength(*m_QueueRead);
         iFirst  = iFirst - iSecond;
 
         //!
@@ -147,16 +150,18 @@ VOID WINAPI OnHandleMessage()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// TRAMPOLINE
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-VOID WINAPI OnHandleFlush()
+VOID WINAPI OnLoop()
 {
-    //!
-    //! Retrieve the buffer of the messages.
-    //!
-    INT iLen     = QueueLength(m_QueueWrite);
+    if (*m_QueueWrite == NULL)
+    {
+        return;
+    }
+
+    INT iLen = QueueLength(*m_QueueWrite);
     if (iLen > 0)
     {
         LPBYTE lpBuffer = ALLOCATE_ARRAY(BYTE, iLen);
-        QueuePeak(m_QueueWrite, lpBuffer, iLen);
+        QueuePeak(*m_QueueWrite, lpBuffer, iLen);
 
         //!
         //! Send the message to the buffer.
@@ -168,45 +173,46 @@ VOID WINAPI OnHandleFlush()
         //!
         FREE(lpBuffer);
     }
+
+    //!
+    //! [CALL]
+    //!
     Engine::NetHandle();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// HOOK
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-GENERATE_METHOD_0F(HkHandleMessage, OnHandleMessage, m_HandleDetour.lpTrampoline);
-GENERATE_METHOD_0F(HkHandleFlush,   OnHandleFlush,   m_FlushDetour.lpTrampoline);
+GENERATE_METHOD_0F(HkRcvData, OnRecvMessage, m_RecvDetour.lpTrampoline);
+GENERATE_METHOD_0F(HkLoop,    OnLoop,        m_LoopDetour.lpTrampoline);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /// IMPLEMENTATION
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnCreate()
 {
-    //!
-    //! [GET] Buffers
-    //!
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //! [GET] ClsByteQueue INSTANCE
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     LPVOID lpRecvDataMethod = Memory::Find((LPVOID) 0x410000, 0x200000, 
             "\xA1\xFF\xFF\xFF\xFF\x8D\x4D\xA8\x51\x8D\x4D\xE4\x8B\x10\x6A\xFF\x51\x50",
             "x????xxxxxxxxxxxxx");
-    DWORD lpRecvDataReadBuffer = *(LPDWORD)(((LPBYTE) lpRecvDataMethod) + 0x01);
-    m_QueueRead = (LPVOID) *(LPDWORD)(lpRecvDataReadBuffer);
+    m_QueueRead = (LPVOID *) *(LPDWORD)(((LPBYTE) lpRecvDataMethod) + 0x01);
 
     LPVOID lpSendDataMethod = Memory::Find((LPVOID) 0x510000, 0x200000, 
             "\xFF\xD7\x66\x85\xF6\x74\x3E\xA1\xFF\xFF\xFF\xFF"
             "\x8D\x55\xA0\x52",
             "xxxxxxxx????xxxx");
-    DWORD lpSendDataWriteBuffer = *(LPDWORD)(((LPBYTE) lpSendDataMethod) + 0x08);
-    m_QueueWrite  = (LPVOID) *(LPDWORD)(lpSendDataWriteBuffer);
+    m_QueueWrite = (LPVOID *) *(LPDWORD)(((LPBYTE) lpSendDataMethod) + 0x08);
 
-#ifdef _DEBUG_
     EngineAPI::StringDebugW(L"[W][Memory] Write[0x%X] Read[0x%X]", 
         (DWORD) m_QueueWrite, 
         (DWORD) m_QueueRead);
-#endif // _DEBUG_
 
-    //!
-    //! [GET] ClsByteQueue methods.
-    //!
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //! [GET] ClsByteQueue METHOD.
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     m_QueueLengthMethod = (ClsByteQueueLength) Memory::Backtrace(
         Memory::Find((LPVOID) 0x510000, 0x100000, 
             "\x53\x56\x57\x89\x65\xF4\xC7\x45\xF8\xFF\xFF\xFF\xFF"
@@ -224,27 +230,26 @@ VOID Foundation::OnCreate()
             "\xFF\x50\x04\x8B\x45\x10\x89\x7D\xE8\x3B\xC7\x89"
             "\x7D\xE4\x7E\x18",
             "xxxxxxxxxxxxxxxx"));
-#ifdef _DEBUG_
+
     EngineAPI::StringDebugW(L"[W][Memory] .Length[0x%X] .Write[0x%X] .Peek[0x%X]", 
         (DWORD) m_QueueLengthMethod, 
         (DWORD) m_QueueWriteMethod,
         (DWORD) m_QueuePeekMethod);
-#endif // _DEBUG_
 
-    //!
-    //! [DETOUR] MainAO (Handle)
-    //!
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //! [DETOUR] Recv
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     TAction nAction;
     nAction.lpAddress   = (LPVOID) 0x510000;
-    nAction.lpFunction  = (LPVOID) &HkHandleMessage;
+    nAction.lpFunction  = (LPVOID) &HkRcvData;
     nAction.szwcPattern = "\x50\x8B\x0D\xFF\xFF\xFF\xFF\x8B\x11\xA1\xFF\xFF"
                           "\xFF\xFF\x50\xFF\x52\x78\xDB\xE2\x89\x45\xBC\x83"
                           "\x7D\xBC\x00";
     nAction.szwcMask    = "xxx????xxx????xxxxxxxxxxxxx";
-    LPVOID fnHandleIncomingMessages = Memory::MmWrite(nAction, &m_HandleDetour);
+    LPVOID fnHandleIncomingMessages = Memory::MmWrite(nAction, &m_RecvDetour);
 
     //!
-    //! Prevent recursive from happening in MainAO handle method.
+    //! Prevent recursive from happening.
     //!
     LPVOID lpRecursive = Memory::Find(fnHandleIncomingMessages, 
         0x10000,
@@ -253,16 +258,16 @@ VOID Foundation::OnCreate()
         "x????x????xxxxxxxxx");
     Memory::MmHandleNop(lpRecursive, 0x05);
 
-    //!
-    //! [DETOUR] MainAO (Flush)
-    //!
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //! [DETOUR] Loop
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     nAction.lpAddress   = (LPVOID) 0x510000;
-    nAction.lpFunction  = (LPVOID) &HkHandleFlush;
+    nAction.lpFunction  = (LPVOID) &HkLoop;
     nAction.szwcPattern = "\x8B\x45\xD8\x8D\x55\xE4\x52\x50\x8B\x08\xFF\x91"
                           "\xAC\x00\x00\x00\x3B\xC7\xDB\xE2\x7D\x11\x8B\x4D"
                           "\xD8\x68\xAC\x00\x00\x00";
     nAction.szwcMask    = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-    Memory::MmWrite(nAction, &m_FlushDetour);
+    Memory::MmWrite(nAction, &m_LoopDetour);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -270,8 +275,11 @@ VOID Foundation::OnCreate()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnDestroy()
 {
-   Memory::MmErase(m_HandleDetour);
-   Memory::MmErase(m_FlushDetour);
+    //!
+    //! Erase all trampolines.
+    //! 
+    Memory::MmErase(m_RecvDetour);
+    Memory::MmErase(m_LoopDetour);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -279,12 +287,12 @@ VOID Foundation::OnDestroy()
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnSend(LPCSTR szwData, DWORD dwLength)
 {
-    QueueWrite(m_QueueWrite, (LPBYTE) szwData, dwLength);
+    QueueWrite(*m_QueueWrite, (LPBYTE) szwData, dwLength);
 
     //!
     //! Handle the message premature.
     //!
-    ((ModProtocolFlushBuffer) m_FlushDetour.lpTrampoline)();
+    __asm CALL m_LoopDetour.lpTrampoline
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -292,10 +300,10 @@ VOID Foundation::OnSend(LPCSTR szwData, DWORD dwLength)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 VOID Foundation::OnReceive(LPCSTR szwData, DWORD dwLength)
 {
-    QueueWrite(m_QueueRead, (LPBYTE) szwData, dwLength);
+    QueueWrite(*m_QueueRead, (LPBYTE) szwData, dwLength);
 
     //!
     //! Handle the message premature.
     //!
-    ((ModProtocolHandleIncomingMessage) m_HandleDetour.lpTrampoline)();
+    __asm CALL m_RecvDetour.lpTrampoline
 }

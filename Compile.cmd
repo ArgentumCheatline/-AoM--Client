@@ -4,10 +4,12 @@ IF  EXIST  "%VS120COMNTOOLS%"  CALL  "%VS120COMNTOOLS%vsvars32.bat"
 IF  EXIST  "%VS110COMNTOOLS%"  CALL  "%VS110COMNTOOLS%vsvars32.bat"
 IF  EXIST  "%VS100COMNTOOLS%"  CALL  "%VS100COMNTOOLS%vsvars32.bat"
 
-CD %1
+CD AoM-Client-%1
+CD %2
 IF NOT EXIST "build"          MKDIR build
 CD build
 CMAKE -G "NMake Makefiles" ..
 NMAKE
+cd ..
 cd ..
 cd ..

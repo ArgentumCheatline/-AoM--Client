@@ -1,2 +1,4 @@
-CALL Compile.cmd "AoM-DLL-Furius"
-CALL Compile.cmd "AoM-DLL-Main"
+CALL Compile.cmd "Plain" "FuriusAO"
+CALL Compile.cmd "Binary" "MainAO"
+CALL Compile.cmd "Binary" "HispanoAO"
+

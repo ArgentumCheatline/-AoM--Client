@@ -13,7 +13,7 @@ PROJECT(Proxy_Furius)
 ##
 SET(CMAKE_BUILD_TYPE "MINSIZEREL")
 SET(CMAKE_CXX_FLAGS "/Oy /Zl /EHs-c- /Os /GS- /Gy /Gd /Gm- /nologo /W3")
-##SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_DEBUG_") 
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_DEBUG_") 
 
 ##
 ## Enable TINY_MODE (LINKER)
@@ -25,13 +25,13 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DLL")
 ##
 ## Add the project includes
 ##
-INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../AoM-Client/include")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../../AoM-Client/include")
 
 ##
 ## Add the project files
 ##
 FILE(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-FILE(GLOB_RECURSE SOURCES_X "${CMAKE_CURRENT_SOURCE_DIR}/../AoM-Client/src/*.cpp")
+FILE(GLOB_RECURSE SOURCES_X "${CMAKE_CURRENT_SOURCE_DIR}/../../AoM-Client/src/*.cpp")
 
 ##
 ## Make the executable

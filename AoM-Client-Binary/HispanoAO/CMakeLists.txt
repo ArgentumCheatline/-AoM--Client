@@ -4,9 +4,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.2 FATAL_ERROR)
 
 ##
-## The name of the project is "Proxy_Main"
+## The name of the project is "Proxy_Hispano"
 ##
-PROJECT(Proxy_Main)
+PROJECT(Proxy_Hispano)
 
 ##
 ## Enable TINY_MODE (COMPILER)
@@ -25,15 +25,15 @@ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /DLL")
 ##
 ## Add the project includes
 ##
-INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../AoM-Client/include")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/../../AoM-Client/include")
 
 ##
 ## Add the project files
 ##
 FILE(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
-FILE(GLOB_RECURSE SOURCES_X "${CMAKE_CURRENT_SOURCE_DIR}/../AoM-Client/src/*.cpp")
+FILE(GLOB_RECURSE SOURCES_X "${CMAKE_CURRENT_SOURCE_DIR}/../../AoM-Client/src/*.cpp")
 
 ##
 ## Make the executable
 ##
-ADD_LIBRARY(Proxy_Main SHARED ${SOURCES} ${SOURCES_X})
+ADD_LIBRARY(Proxy_Hispano SHARED ${SOURCES} ${SOURCES_X})
